@@ -15,3 +15,9 @@ updates:
     groups:
       dev-tools:
         dependency-type: development
+    ignore:
+      # @types/node tracks the Node.js major the project runs on (24 in CI).
+      # A newer major would type APIs that do not exist at run time; move it
+      # together with node-version in ci.yml, by hand.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
