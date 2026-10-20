@@ -67,3 +67,30 @@ export const readOutputs = {
   }),
   tasks_list: z.object({ tasks: z.array(Task) }),
 };
+
+export function writeInputs(limits: Limits) {
+  return {
+    notes_write: z.object({
+      path: NotePath,
+      content: z.string().max(limits.maxNoteBytes).describe("The whole note, in Markdown"),
+      overwrite: z.boolean().default(false).describe("Required to replace an existing note"),
+    }),
+    notes_append: z.object({
+      path: NotePath,
+      text: z.string().min(1).max(limits.maxNoteBytes).describe("Markdown to add at the end"),
+    }),
+    tasks_add: z.object({
+      title: z.string().min(1).max(200),
+      due: z.iso.date().optional().describe("Due date, YYYY-MM-DD"),
+      tags: z.array(Tag).max(10).default([]),
+    }),
+    tasks_complete: z.object({ id: z.uuid().describe("The task id from tasks_list") }),
+  };
+}
+
+export const writeOutputs = {
+  notes_write: z.object({ path: z.string(), created: z.boolean(), bytes: z.int() }),
+  notes_append: z.object({ path: z.string(), bytes: z.int() }),
+  tasks_add: z.object({ task: Task }),
+  tasks_complete: z.object({ task: Task }),
+};
