@@ -110,7 +110,7 @@ function isMissing(error: unknown): boolean {
   return code === "ENOENT" || code === "ENOTDIR";
 }
 
-export type PathKind = "note" | "folder";
+export type PathKind = "note" | "path";
 
 /** The workspace root, canonicalized once, and the only way to turn tool input into paths. */
 export class Sandbox {

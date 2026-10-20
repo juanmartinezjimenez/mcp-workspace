@@ -152,7 +152,7 @@ describe("Sandbox on the real file system", () => {
     expect(await sandbox.resolve("inbox/2026/new.md", "note")).toBe(
       path.join(sandbox.root, "inbox", "2026", "new.md"),
     );
-    expect(await sandbox.resolve("projects", "folder")).toBe(path.join(sandbox.root, "projects"));
+    expect(await sandbox.resolve("projects", "path")).toBe(path.join(sandbox.root, "projects"));
   });
 
   it("refuses a directory link that leads outside the root", async () => {
@@ -164,7 +164,7 @@ describe("Sandbox on the real file system", () => {
       "leads outside the workspace through a link",
     );
     await expect(sandbox.resolve("escape/new.md", "note")).rejects.toThrow(SandboxError);
-    await expect(sandbox.resolve("escape", "folder")).rejects.toThrow(SandboxError);
+    await expect(sandbox.resolve("escape", "path")).rejects.toThrow(SandboxError);
   });
 
   it("allows a link that stays inside the root", async () => {
