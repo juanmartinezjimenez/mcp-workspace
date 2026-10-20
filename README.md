@@ -46,11 +46,17 @@ cd mcp-workspace
 npm ci && npm run build
 
 # Register it in Claude Code, read-only, on a folder of notes (absolute paths)
-claude mcp add workspace -- node "$PWD/dist/index.js" --root /path/to/notes
+claude mcp add mcp-workspace -- node "$PWD/dist/index.js" --root /path/to/notes
+
+# Later, to let the agent append to notes and add tasks (and nothing else)
+claude mcp remove mcp-workspace
+claude mcp add mcp-workspace -- node "$PWD/dist/index.js" --root /path/to/notes --allow-write notes_append,tasks_add
 ```
 
-On Windows with Git Bash, use `"$(pwd -W)/dist/index.js"` and a `C:/...` root:
-the host launches `node` directly, and Node does not understand `/c/...` paths.
+- Name the server `mcp-workspace` (or anything else): `workspace` is a reserved
+  name in Claude Code, and `claude mcp add workspace` is refused.
+- On Windows with Git Bash, use `"$(pwd -W)/dist/index.js"` and a `C:/...` root:
+  the host launches `node` directly, and Node does not understand `/c/...` paths.
 
 Then ask the agent something like *"What is in my inbox?"* or *"Which tasks are
 open?"*. Try it on [`examples/workspace/`](examples/workspace/), a folder of
@@ -62,7 +68,7 @@ synthetic notes and tasks.
 ```json
 {
   "servers": {
-    "workspace": {
+    "mcp-workspace": {
       "type": "stdio",
       "command": "node",
       "args": ["/path/to/mcp-workspace/dist/index.js", "--root", "/path/to/notes"]
@@ -82,7 +88,7 @@ synthetic notes and tasks.
 | `notes_search` | read | Case-insensitive search over note lines, with path and line number |
 | `tasks_list` | read | Lists tasks from `tasks.json`, open ones by default, optionally by tag |
 | `notes_write` | write | Creates a note, or replaces one with `overwrite: true` |
-| `notes_append` | write | Appends to a note on a new line, creating it if needed |
+| `notes_append` | write | Appends to a note on its own line, creating it if needed; the note always ends with a newline |
 | `tasks_add` | write | Adds an open task with optional due date and tags |
 | `tasks_complete` | write | Marks a task as done (idempotent) |
 
@@ -148,9 +154,9 @@ contains such an instruction, to see the behaviour for yourself.
 
 | Check | Value |
 | --- | --- |
-| Tests | 130, on Ubuntu and Windows in CI |
+| Tests | 134, on Ubuntu and Windows in CI |
 | Protocol | Both eras over stdio: `2026-07-28` and the earlier `initialize` era |
-| Sandbox cases | 40 rejected and 7 accepted paths, plus real symlinks and junctions |
+| Sandbox cases | 43 rejected and 7 accepted paths, plus real symlinks and junctions |
 | Concurrency | 25 parallel appends and 20 parallel task adds, none lost |
 | Runtime dependencies | `@modelcontextprotocol/server` and `zod` |
 
