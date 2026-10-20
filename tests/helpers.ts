@@ -1,6 +1,10 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
+import { type Config, DEFAULT_LIMITS, type Limits } from "../src/config.js";
+import { Sandbox } from "../src/sandbox.js";
+import { createServer } from "../src/server.js";
 
 /** A temporary workspace with synthetic files; `cleanup` removes it. */
 export async function makeWorkspace(files: Record<string, string> = {}) {
@@ -13,6 +17,22 @@ export async function makeWorkspace(files: Record<string, string> = {}) {
     await writeFile(target, content);
   }
   return { base, root, cleanup: () => rm(base, { recursive: true, force: true }) };
+}
+
+/**
+ * A real MCP client connected in-process to a server for `root`. The SDK's
+ * in-memory pair speaks the 2025 (initialize) era only; the 2026-07-28 era is
+ * covered end to end over stdio, through the same entry point hosts use.
+ */
+export async function connect(root: string, { limits = {} }: { limits?: Partial<Limits> } = {}) {
+  const config: Config = { root, limits: { ...DEFAULT_LIMITS, ...limits } };
+  const sandbox = await Sandbox.open(root);
+  const server = createServer(config, sandbox);
+  const [clientEnd, serverEnd] = InMemoryTransport.createLinkedPair();
+  await server.connect(serverEnd);
+  const client = new Client({ name: "mcp-workspace-tests", version: "0.0.0" });
+  await client.connect(clientEnd);
+  return { client, close: () => client.close() };
 }
 
 export const SAMPLE_TASKS = {
