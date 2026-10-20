@@ -1,6 +1,6 @@
 {
   "name": "mcp-workspace",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "MCP server that gives an AI agent sandboxed, permissioned access to local notes and tasks",
   "license": "MIT",
