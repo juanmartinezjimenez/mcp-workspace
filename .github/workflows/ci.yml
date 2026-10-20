@@ -30,11 +30,36 @@ jobs:
           pip install pre-commit
           pre-commit run --all-files --show-diff-on-failure
 
-  # Each project adds its own job below, e.g.:
-  # test:
-  #   name: Tests
-  #   runs-on: ubuntu-latest
-  #   needs: hygiene
-  #   steps:
-  #     - uses: actions/checkout@v7
-  #     - run: make test
+  checks:
+    name: Lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  test:
+    # Path handling differs between POSIX and Windows, and the sandbox must hold on both.
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
