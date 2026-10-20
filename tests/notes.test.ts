@@ -53,7 +53,8 @@ describe("listNotes", () => {
     await expect(listNotes(sandbox, "../")).rejects.toThrow(SandboxError);
   });
 
-  it(`stops at ${LIST_LIMIT} notes and says so`, async () => {
+  // Creates and lists 503 files: well over Vitest's 5 s default on Windows runners.
+  it(`stops at ${LIST_LIMIT} notes and says so`, { timeout: 30_000 }, async () => {
     const files = Object.fromEntries(
       Array.from({ length: LIST_LIMIT + 3 }, (_, i) => [`n${String(i).padStart(4, "0")}.md`, "x"]),
     );
