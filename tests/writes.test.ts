@@ -88,10 +88,18 @@ describe("writeNote", () => {
 });
 
 describe("appendNote", () => {
-  it("creates a missing note and appends on a new line", async () => {
+  it("puts each append on its own line and always ends the note with a newline", async () => {
+    const { sandbox, read } = await workspace({ "inbox.md": "# Inbox\n" });
+    await appendNote(sandbox, "inbox.md", "- Call the plumber", LIMITS);
+    expect(await read("inbox.md")).toBe("# Inbox\n- Call the plumber\n");
+    await appendNote(sandbox, "inbox.md", "- Renew the library card", LIMITS);
+    expect(await read("inbox.md")).toBe("# Inbox\n- Call the plumber\n- Renew the library card\n");
+  });
+
+  it("creates a missing note and fixes a note that did not end in a newline", async () => {
     const { sandbox, read } = await workspace({ "log.md": "# Log\n- one" });
     await appendNote(sandbox, "new.md", "- first", LIMITS);
-    expect(await read("new.md")).toBe("- first");
+    expect(await read("new.md")).toBe("- first\n");
     expect(await appendNote(sandbox, "log.md", "- two\n", LIMITS)).toEqual({
       path: "log.md",
       bytes: Buffer.byteLength("# Log\n- one\n- two\n"),
