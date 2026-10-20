@@ -144,7 +144,7 @@ function registerWriteTools(server: McpServer, config: Config, sandbox: Sandbox)
       "notes_append",
       {
         title: "Append to a note",
-        description: `Add Markdown at the end of a note, on a new line; creates the note if it does not exist. The note can be at most ${limits.maxNoteBytes} bytes afterwards.`,
+        description: `Add Markdown at the end of a note, on its own line; the note always ends with a newline. Creates the note if it does not exist. The note can be at most ${limits.maxNoteBytes} bytes afterwards.`,
         inputSchema: inputs.notes_append,
         outputSchema: writeOutputs.notes_append,
         annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },

@@ -91,8 +91,11 @@ export function appendNote(
     const current = await existingSize(file);
     if (current !== undefined) checkNoteSize(notePath, current + utf8Bytes(text), limits);
     const before = current === undefined ? "" : await readFile(file, "utf8");
+    // The added text starts on its own line and the note always ends with a
+    // newline, so the next append can never join the last line.
     const separator = before === "" || before.endsWith("\n") ? "" : "\n";
-    const content = before + separator + text;
+    const ending = text.endsWith("\n") ? "" : "\n";
+    const content = before + separator + text + ending;
     const bytes = utf8Bytes(content);
     checkNoteSize(notePath, bytes, limits);
     await writeAtomic(file, content);
