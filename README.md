@@ -49,6 +49,9 @@ npm ci && npm run build
 claude mcp add workspace -- node "$PWD/dist/index.js" --root /path/to/notes
 ```
 
+On Windows with Git Bash, use `"$(pwd -W)/dist/index.js"` and a `C:/...` root:
+the host launches `node` directly, and Node does not understand `/c/...` paths.
+
 Then ask the agent something like *"What is in my inbox?"* or *"Which tasks are
 open?"*. Try it on [`examples/workspace/`](examples/workspace/), a folder of
 synthetic notes and tasks.
