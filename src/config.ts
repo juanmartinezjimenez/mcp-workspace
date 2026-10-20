@@ -15,9 +15,30 @@ export interface Limits {
   maxSearchResults: number;
 }
 
+/** Write tools exist only when named in --allow-write; there is no wildcard. */
+export const WRITE_TOOLS = ["notes_write", "notes_append", "tasks_add", "tasks_complete"] as const;
+export type WriteTool = (typeof WRITE_TOOLS)[number];
+
 export interface Config {
   root: string;
+  /** Write tools to register; empty means read-only. */
+  allowWrite: ReadonlySet<WriteTool>;
   limits: Limits;
+}
+
+function parseAllowWrite(raw: string | undefined): Set<WriteTool> {
+  const names = (raw ?? "")
+    .split(",")
+    .map((name) => name.trim())
+    .filter((name) => name !== "");
+  const unknown = names.filter((name) => !(WRITE_TOOLS as readonly string[]).includes(name));
+  if (unknown.length > 0) {
+    throw new ConfigError(
+      `--allow-write: unknown write tool ${unknown.map((n) => `"${n}"`).join(", ")}; ` +
+        `choose from ${WRITE_TOOLS.join(", ")}`,
+    );
+  }
+  return new Set(names as WriteTool[]);
 }
 
 export const DEFAULT_LIMITS: Readonly<Limits> = {
@@ -69,6 +90,7 @@ export function parseConfig(
       args: [...argv],
       options: {
         root: { type: "string" },
+        "allow-write": { type: "string" },
         "max-note-bytes": { type: "string" },
         "max-read-bytes": { type: "string" },
         "max-search-results": { type: "string" },
@@ -89,6 +111,7 @@ export function parseConfig(
   };
   return {
     root,
+    allowWrite: parseAllowWrite(values["allow-write"] ?? env.MCP_WORKSPACE_ALLOW_WRITE),
     limits: {
       maxNoteBytes: limit("maxNoteBytes"),
       maxReadBytes: limit("maxReadBytes"),
