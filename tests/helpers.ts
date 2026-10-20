@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
-import { type Config, DEFAULT_LIMITS, type Limits } from "../src/config.js";
+import { type Config, DEFAULT_LIMITS, type Limits, type WriteTool } from "../src/config.js";
 import { Sandbox } from "../src/sandbox.js";
 import { createServer } from "../src/server.js";
 
@@ -24,8 +24,15 @@ export async function makeWorkspace(files: Record<string, string> = {}) {
  * in-memory pair speaks the 2025 (initialize) era only; the 2026-07-28 era is
  * covered end to end over stdio, through the same entry point hosts use.
  */
-export async function connect(root: string, { limits = {} }: { limits?: Partial<Limits> } = {}) {
-  const config: Config = { root, limits: { ...DEFAULT_LIMITS, ...limits } };
+export async function connect(
+  root: string,
+  { limits = {}, allowWrite = [] }: { limits?: Partial<Limits>; allowWrite?: WriteTool[] } = {},
+) {
+  const config: Config = {
+    root,
+    allowWrite: new Set(allowWrite),
+    limits: { ...DEFAULT_LIMITS, ...limits },
+  };
   const sandbox = await Sandbox.open(root);
   const server = createServer(config, sandbox);
   const [clientEnd, serverEnd] = InMemoryTransport.createLinkedPair();
