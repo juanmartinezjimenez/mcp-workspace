@@ -9,3 +9,10 @@ These rules apply to Claude Code and any other agent working in this repo.
 - Every behaviour change ships with a test. CI must be green before merging.
 - Decisions that are expensive to reverse get an ADR in `docs/adr/`.
 - Update `CHANGELOG.md` under `[Unreleased]` for user-visible changes.
+
+## This repository
+
+- TypeScript MCP server; design in `docs/adr/0002-sandboxed-notes-and-tasks-server.md`.
+- Before every push: `npm run check` (Biome lint, `tsc --noEmit`, Vitest). Format with `npm run format`.
+- Never write to stdout from server code: it is the MCP protocol channel. Log to stderr.
+- Every path from a tool argument goes through the sandbox check before any file system call.
