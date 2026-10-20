@@ -35,7 +35,6 @@ function hasControlCharacter(text: string): boolean {
 
 function checkSegment(segment: string): void {
   if (segment === "") throw new SandboxError("empty path segment (double or trailing slash)");
-  if (segment === "." || segment === "..") throw new SandboxError("'.' and '..' are not allowed");
   if (segment.startsWith(".")) {
     throw new SandboxError(`hidden files and folders are not allowed: "${segment}"`);
   }
@@ -70,6 +69,19 @@ export function checkRelativePath(input: string): string[] {
     throw new SandboxError("path must be relative to the workspace root");
   }
   const segments = input.split("/");
+  // "." and ".." get their own messages, saying how to write the path instead.
+  if (segments.includes("..")) {
+    throw new SandboxError(
+      "'..' is not allowed: paths cannot leave the workspace root; " +
+        "use a path relative to the workspace root, like 'inbox.md'",
+    );
+  }
+  if (segments.includes(".")) {
+    const suggestion = segments.filter((segment) => segment !== ".").join("/") || "inbox.md";
+    throw new SandboxError(
+      `'.' segments are not needed: use a path relative to the workspace root, like '${suggestion}'`,
+    );
+  }
   for (const segment of segments) checkSegment(segment);
   return segments;
 }
