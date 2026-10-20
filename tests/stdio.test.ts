@@ -47,3 +47,30 @@ describe.each(Object.entries(ERAS))("stdio, %s era", (_era, options) => {
     expect(list.structuredContent).toMatchObject({ notes: [{ path: "inbox.md", title: "Inbox" }] });
   });
 });
+
+describe("stdio with --allow-write", () => {
+  it("registers only the named write tools and writes through them", async () => {
+    const workspace = await makeWorkspace({});
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [SERVER, "--root", workspace.root, "--allow-write", "notes_append"],
+      stderr: "pipe",
+    });
+    const client = new Client({ name: "stdio-test", version: "0.0.0" });
+    cleanup = async () => {
+      await client.close();
+      await workspace.cleanup();
+    };
+
+    await client.connect(transport);
+    const names = (await client.listTools()).tools.map((t) => t.name);
+    const appended = await client.callTool({
+      name: "notes_append",
+      arguments: { path: "inbox.md", text: "- from stdio\n" },
+    });
+
+    expect(names).toContain("notes_append");
+    expect(names).not.toContain("notes_write");
+    expect(appended.structuredContent).toEqual({ path: "inbox.md", bytes: 13 });
+  });
+});

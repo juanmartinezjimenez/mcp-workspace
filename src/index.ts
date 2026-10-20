@@ -12,8 +12,10 @@ async function main(): Promise<void> {
     const config = parseConfig(process.argv.slice(2), process.env);
     const sandbox = await Sandbox.open(config.root);
     const { maxNoteBytes, maxReadBytes, maxSearchResults } = config.limits;
+    const writes =
+      config.allowWrite.size === 0 ? "read-only" : `writes: ${[...config.allowWrite].join(", ")}`;
     console.error(
-      `mcp-workspace ${SERVER_VERSION}: root ${sandbox.root}; read-only; ` +
+      `mcp-workspace ${SERVER_VERSION}: root ${sandbox.root}; ${writes}; ` +
         `limits: note ${maxNoteBytes} B, read ${maxReadBytes} B, search ${maxSearchResults} results`,
     );
     serveStdio(() => createServer(config, sandbox));
