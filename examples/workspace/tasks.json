@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "3f2b7c1e-8a4d-4e6f-9b0a-1c2d3e4f5a60",
+      "title": "Book the bike service",
+      "status": "open",
+      "due": "2026-10-23",
+      "tags": ["personal"],
+      "created": "2026-10-20T09:00:00.000Z"
+    },
+    {
+      "id": "7a8b9c0d-1e2f-4a3b-8c4d-5e6f7a8b9c01",
+      "title": "Plant the garlic",
+      "status": "done",
+      "tags": ["garden"],
+      "created": "2026-10-18T09:00:00.000Z",
+      "completed": "2026-10-19T17:30:00.000Z"
+    }
+  ]
+}
